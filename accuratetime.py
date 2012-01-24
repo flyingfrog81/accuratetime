@@ -63,7 +63,9 @@ USAGE
 
 import datetime
 import time
+#from functools import total_ordering #Python2.7
 
+#@total_ordering
 class AccurateTime(object):
     '''
     Class for storing a POSIX time with arbitrary floating point precision.
@@ -116,6 +118,38 @@ class AccurateTime(object):
         @return: a floating point number representing microseconds
         """
         return self._accurate_posix % 1 * 1000000
+
+    def __add__(self, other):
+        """
+        Addition operator. 
+        @type other: a datetime.timedelta instance or a numeric type
+        @param other: a time difference
+        @return: a new L{AccurateTime} instance
+        @raise TypeError: if values cannot be summed up
+        """
+        try:
+            return from_datetime(self._datetime + other)
+        except TypeError:
+            try:
+                return from_ptime(self._accurate_posix + other)
+            except TypeError:
+                raise TypeError("unsupported operand type(s) for +: 'AccurateTime' and " + type(other))
+
+    def __sub__(self, other):
+        """
+        Subtraction operator. 
+        @type other: a datetime.timedelta instance or a numeric type
+        @param other: a time difference
+        @return: a new L{AccurateTime} instance
+        @raise TypeError: if values cannot be subtracted from each other
+        """
+        try:
+            return from_datetime(self._datetime - other)
+        except TypeError:
+            try:
+                return from_ptime(self._accurate_posix - other)
+            except TypeError:
+                raise TypeError("unsupported operand type(s) for +: 'AccurateTime' and '" + str(type(other)) + "'")
 
 def from_datetime(dt):
     """
